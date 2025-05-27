@@ -1,5 +1,5 @@
-from utils.image_utils.create_description import create_description_image
-from config import image_folder_path
+from utils.image.create_description import create_image_description
+from core.config import image_folder_path
 
 
 class Image:
@@ -8,13 +8,17 @@ class Image:
         self.description = description
     
     @property
-    def file_path(self):
+    def file_path(self) -> str:
         return image_folder_path / (self.file_name + ".png")
     
     async def generate_description(self):
         if not self.description:
-            self.description = await create_description_image(self)
+            self.description = await create_image_description(str(self.file_path))
         return self.description
     
     def __str__(self):
-        return f"image: name - {self.file_name}, description - {self.description}"
+        return (
+            "Image Information:\n"
+            f"- Name: {self.file_name}\n"
+            f"- Description: {self.description}"
+        )

@@ -1,6 +1,6 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from config import ConfigManager
+from core.config import ConfigManager
 from core.models import User
 
 

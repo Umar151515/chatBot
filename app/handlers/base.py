@@ -1,12 +1,11 @@
 from aiogram import F, Router
 from aiogram.enums import ParseMode
-from aiogram.filters import CommandStart, Command
+from aiogram.filters import CommandStart
 from aiogram.types import Message
 
 from app import keyboards
-from core.models import User
-from core.logic import UserLogic
-from ..utils import send_message
+from core.managers import UserManager
+from ..utils.messages import send_message
 
 
 router = Router()
@@ -17,14 +16,14 @@ async def start(message: Message):
         user = message.from_user
 
         await send_message(message, f"Привет, *{user.first_name}*!\nЯ бот для общения. Напиши мне что-нибудь, и я отвечу!", 
-                     reply_markup=keyboards.get_main_keyboard(UserLogic.get_user(user.id).web_search))
+                     reply_markup=keyboards.get_main_keyboard(UserManager.get_user(user.id).web_search))
     except Exception as e:
         await send_message(message, f"{e}\n❌ Произошла ошибка при запуске бота. Попробуйте снова.", parse_mode=None)
 
 @router.message(F.text == "👤 Мой аккаунт")
 async def enable_web_search(message: Message):
     try:
-        user = UserLogic.get_user(message.from_user.id)
+        user = UserManager.get_user(message.from_user.id)
         
         account_info = (
             "🔐 <b>Ваш аккаунт</b>\n\n"

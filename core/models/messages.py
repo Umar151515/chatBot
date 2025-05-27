@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import os
 
-from config import ConfigManager
-from ..logic.user_logic import UserLogic
+from core.config import ConfigManager
+from ..managers.user_manager import UserManager
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -23,12 +23,12 @@ class Messages:
 
     def add_message(self, role: str, content: str) -> None:
         self.messages.append({"role": role, "content": content})
-        UserLogic.save()
+        UserManager.save()
 
     def add_image(self, role: str, image: Image) -> None:
         self.messages.append({"role": role, "content": str(image)})
         self.images.append(image)
-        UserLogic.save()
+        UserManager.save()
 
     def get_messages(self) -> "Messages":
         return Messages([message for message in self.messages if message["role"] != "system"])
@@ -41,7 +41,11 @@ class Messages:
         self.messages.clear()
 
         self.set_system_prompt()
-        UserLogic.save()
+        UserManager.save()
 
     def set_system_prompt(self):
+        self.add_message("system", ConfigManager.prompts["language"])
+        self.add_message("system", ConfigManager.roles["Gopnik"])
         self.add_message("system", ConfigManager.prompts["image_generation"])
+        self.add_message("system", ConfigManager.prompts["create_variation_image"])
+        self.add_message("system", ConfigManager.prompts["image_metadata_prompt"])

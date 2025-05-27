@@ -1,12 +1,23 @@
 {
-    "available_tools": ["gpt4free"],
+    "tools": [
+        "gpt4free"
+    ],
     "selected_tool": "gpt4free",
-
     "tools_config": {
         "gpt4free": {
-            "models": ["dall-e-3", "midjourney", "flux", "flux-pro"],
-            "selected_model": "dall-e-3"
+            "models": [
+                "dall-e-3",
+                "flux",
+                "flux-pro",
+                "midjourney"
+            ],
+            "selected_model": "flux",
+            "providers": [
+                "PollinationsAI",
+                "PollinationsImage",
+                "ARTA"
+            ],
+            "selected_provider": "PollinationsAI"
         }
     }
-
 }

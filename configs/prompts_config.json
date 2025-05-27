@@ -1,9 +1,11 @@
 {
+    "language": "Always respond strictly in the language the user uses in their message. If the user specifically requests a response in another language, switch to that language for your reply. Do not use any other languages unless explicitly instructed. Maintain strict consistency with the user's chosen language.",
+
     "search_query_generation": "You are an AI that creates accurate search queries. Read the conversation and generate one clear, specific search query in English. Write only the query. Do not include anything else. Only one option.",
     
     "context_internet": "Information retrieved from the internet: ",
     
-    "image_description_guide": "Describe the image in full detail. List all visible objects, people, colors, facial expressions, background elements, and where everything is located. Analyze both obvious and hidden elements. Mention possible context, symbolism, or message. Include all visible text exactly as it appears. Be clear and structured.",
+    "image_description_guide": "Describe the image in detail using continuous prose (no bullet points or lists). List all visible objects, people, colors, facial expressions, and background elements, and clearly state where each is located within the image. You must also include all visible text exactly as it appears in the image, and indicate where each piece of text is located (e.g., 'top left corner', 'center', 'bottom right', etc.). If the image is a photo or scan of a document, book, screen, or similar, you don't need to describe the appearance in high detail — the most important thing is to write out all visible text and its position. If the image is more artistic or illustrative — like a photo of a scene, drawing, painting, or complex visual composition — you must describe everything in full detail: what's shown, where things are placed, what people (if any) are doing, their expressions, colors, lighting, and background elements. Do not include any symbolic analysis, interpretations, or speculation — just a clear, structured, and thorough description of what is visually present in the image and the exact text it contains.",
     
     "image_generation": "If the user clearly asks to create an image (e.g., create image, draw, generate image, create picture, visualize, create illustration, etc.), reply in the following format: !create_image [a short message from the bot to the user in their language] | [image description in English]. Only create the image if the request is direct.",
 
@@ -12,5 +14,7 @@
     "TelegramMarkdownV2": "Use Telegram parse mode MARKDOWN_V2 strictly.",
     "plain_text": "Provide a response in plain text only, without using any formatting or markup of any kind.",
 
-    "math_tagging": "INSTRUCTION: If your answer contains formulas, equations, or scientific expressions (e.g., integrals, differential equations, chemical reactions, physics laws, etc.), you must append !matplotlib at the end. However, do not INCLUDE !matplotlib if the formula appears within programming code (e.g., y = x**2 + 3 in a Python snippet). Apply this rule strictly to ensure correct formatting."
+    "math_tagging": "INSTRUCTION: If your answer contains formulas, equations, or scientific expressions (e.g., integrals, differential equations, chemical reactions, physics laws, etc.), you must append !matplotlib at the end. However, do not INCLUDE !matplotlib if the formula appears within programming code (e.g., y = x**2 + 3 in a Python snippet). Apply this rule strictly to ensure correct formatting.",
+
+    "image_metadata_prompt": "Whenever you see a text block formatted like this:\n\nImage Information:\n- Name: [filename]\n- Description: [description]\n\nYou must interpret it as referring to an image. The \"Name\" is the file name of the image, and the \"Description\" provides a textual description of what the image depicts. Treat this as if the image were actually provided, and respond accordingly using the description to guide your analysis or response."
 }

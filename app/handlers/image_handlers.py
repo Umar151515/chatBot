@@ -1,29 +1,32 @@
-import uuid
+from io import BytesIO
 
 from aiogram import F, Router, Bot
 from aiogram.types import Message
+from PIL import Image as PillowImage
 
-from core.logic import UserLogic
+from core.managers import UserManager
 from core.models import Image
-from config import image_folder_path
-from ..utils import edit_message, delete_message
-from ..generate_response import handle_bot_response
+from core.config import image_folder_path
+from ..utils.messages import edit_message, delete_message
+from ..utils.generate_response import response_generation
+from utils.file_tools import generate_file_name
 
 
 router = Router()
 
 @router.message(F.photo)
 async def photo_processing(message: Message, bot: Bot):
-    user = UserLogic.get_user(message.from_user.id)
+    user = UserManager.get_user(message.from_user.id)
 
     try:
         upload_image_message = await message.reply("🖼️ Загрузка изображения...")
-
-        short_id = uuid.uuid4().hex[:6]
-        filename = f"{user.id}_{short_id}"
-
+        
+        file_name = generate_file_name()
         file = await bot.get_file(message.photo[-1].file_id)
-        await bot.download_file(file.file_path, image_folder_path / f"{filename}.png")
+        file_bytes = await bot.download_file(file.file_path)
+
+        image = PillowImage.open(file_bytes)
+        image.save(image_folder_path / f"{file_name}.png", format="PNG")
     except Exception as e:
         await edit_message(upload_image_message, f"{e}\n❌ Произошла ошибка при загрузке изображения.", None)
         return
@@ -31,7 +34,7 @@ async def photo_processing(message: Message, bot: Bot):
     try:
         await edit_message(upload_image_message, "🔍 Обработка изображения...")
 
-        image = Image(filename)
+        image = Image(file_name)
         await image.generate_description()
         user.messages.add_image("user", image)
     except Exception as e:
@@ -42,6 +45,6 @@ async def photo_processing(message: Message, bot: Bot):
         user.messages.add_message("user", message.caption)
 
         await delete_message(upload_image_message)
-        await handle_bot_response(message)
+        await response_generation(message)
     else:
         await edit_message(upload_image_message, "✅ Фото успешно загружено в бота!")

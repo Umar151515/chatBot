@@ -1,4 +1,4 @@
-from config.manager import ConfigManager
+from core.config.manager import ConfigManager
 
 
 class User:
