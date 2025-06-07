@@ -2,7 +2,7 @@ from .paths import prompts_config_path
 from .key_value_base import KeyValueBase
 
 
-class PromptsManager(KeyValueBase):
+class PromptsConfig(KeyValueBase):
     config_path = prompts_config_path
     _keys = [
         "search_query_generation",

@@ -1,22 +1,29 @@
 import base64
+import asyncio
 from io import BytesIO
 
 import g4f
 from PIL import Image
 
-from core.config import ConfigManager
+from core.managers import ConfigManager
 
 
-async def generate_image_gpt4free(prompt: str, model:str = None, output_path:str = None) -> bytes:
+async def generate_image_gpt4free(
+        prompt: str, 
+        model:str = None, 
+        output_path:str = None,
+        waiting_time: int = 60
+    ) -> bytes:
+
     provider_name = ConfigManager.image.get_tool_config("gpt4free")["selected_provider"]
     provider = getattr(g4f.Provider, provider_name, None)
     client = g4f.AsyncClient(provider=provider)
 
-    response = await client.images.generate(
+    response = await asyncio.wait_for(client.images.generate(
         prompt=prompt,
         model=model or ConfigManager.image.get_selected_model("gpt4free"),
         response_format="b64_json"
-    )
+    ), waiting_time)
     
     if not response.data or not hasattr(response.data[0], 'b64_json'):
         raise RuntimeError("Unexpected API response format")

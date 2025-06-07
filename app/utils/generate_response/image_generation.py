@@ -24,8 +24,7 @@ async def generate_and_process_image(
         await edit_message(wait_message, "🎨 Генерация изображения...")
         file_name = generate_file_name()
         await generate_image(
-            prompt_image_generation, user.image_model, 
-            user.image_selected_tool, image_folder_path / file_name
+            prompt_image_generation, user.image_model, output_path=image_folder_path / file_name
         )
     except Exception as e:
         await edit_message(wait_message, f"{e}\n❌ Произошла ошибка при генерации изображения.", None)

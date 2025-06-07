@@ -1,7 +1,7 @@
 import asyncio
 from typing import Callable
 
-from core.config import ConfigManager
+from core.managers import ConfigManager
 from .gpt4free import generate_image_gpt4free
 
 
@@ -14,7 +14,7 @@ async def generate_image(
     ) -> bytes:
 
     generation_method = selected_tool or ConfigManager.image.selected_tool
-    methods: dict[str, Callable[[str, str, str], str]] = {
+    methods = {
         "gpt4free": generate_image_gpt4free
     }
     
@@ -25,7 +25,11 @@ async def generate_image(
             method = methods.get(generation_method, None)
             if method is None:
                 raise TypeError(f"Such a image generation tool does not exist: {generation_method}")
-            return await method(prompt, model, output_path)
+            return await method(
+                prompt=prompt, 
+                model=model, 
+                output_path=output_path
+            )
         except Exception as e:
             if attempt == max_attempts - 1:
                 raise RuntimeError(f"All {max_attempts} attempts were unsuccessful") from e

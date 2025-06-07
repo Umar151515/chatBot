@@ -1,7 +1,7 @@
-import markdown
 from aiogram.types import Message
 from aiogram.enums import ParseMode
-from bs4 import BeautifulSoup
+
+from utils.text.processing import split_text
 
 
 async def send_message(
@@ -12,13 +12,22 @@ async def send_message(
         **kwargs
     ) -> None:
 
-    max_length = 4096
-    parts = [text[i:i+max_length] for i in range(0, len(text), max_length)]
-    for part in parts:
+    try:
+        parts = split_text(text, 4096)
+        
+        if len(parts) > 1:
+            parse_mode = None
+
+        for part in parts:
+            if reply:
+                await message.reply(part, parse_mode=parse_mode, **kwargs)
+            else:
+                await message.answer(part, parse_mode=parse_mode, **kwargs)
+    except Exception as e:
         if reply:
-            await message.reply(part, parse_mode=parse_mode, **kwargs)
+            await message.reply(f"{e}\n❌Произошла ошибка при отправке", parse_mode=parse_mode, **kwargs)
         else:
-            await message.answer(part, parse_mode=parse_mode, **kwargs)
+            await message.answer(f"{e}\n❌Произошла ошибка при отправке", parse_mode=parse_mode, **kwargs)
 
 async def edit_message(
         message: Message, 
@@ -27,19 +36,32 @@ async def edit_message(
         **kwargs
     ) -> None:
 
-    max_length = 4096
-    parts = [text[i:i+max_length] for i in range(0, len(text), max_length)]
-    
-    await message.bot.edit_message_text(
-            chat_id=message.chat.id,
-            message_id=message.message_id,
-            text=parts[0],
-            parse_mode=parse_mode,
-            **kwargs
-        )
-    
-    for part in parts[1:]:
-        await message.answer(part, parse_mode=parse_mode)
+    try:
+        parts = split_text(text, 4096)
+        
+        if len(parts) > 1:
+            parse_mode = None
+
+        await message.bot.edit_message_text(
+                chat_id=message.chat.id,
+                message_id=message.message_id,
+                text=parts[0],
+                parse_mode=parse_mode,
+                **kwargs
+            )
+        for part in parts[1:]:
+            await message.answer(part, parse_mode=None)
+    except Exception as e:
+        if len(parts) > 1:
+            await message.answer(f"{e}\n❌Произошла ошибка при отправке", parse_mode=parse_mode, **kwargs)
+        else:
+            await message.bot.edit_message_text(
+                chat_id=message.chat.id,
+                message_id=message.message_id,
+                text=f"{e}\n❌Произошла ошибка при отправке",
+                parse_mode=parse_mode,
+                **kwargs
+            )
 
 async def delete_message(message: Message):
     try:

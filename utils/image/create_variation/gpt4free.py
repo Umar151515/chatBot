@@ -1,17 +1,19 @@
 import base64
+import asyncio
 from io import BytesIO
 
 import g4f
 from PIL import Image
 
-from core.config import ConfigManager
+from core.managers import ConfigManager
 
 
 async def create_image_variation_gpt4free(
         prompt: str, 
         input_image: str | bytes, 
         model:str = None, 
-        output_path:str = None
+        output_path:str = None,
+        waiting_time: int = 60
     ) -> bytes:
     
     provider_name = ConfigManager.image.get_tool_config("gpt4free")["selected_provider"]
@@ -26,11 +28,11 @@ async def create_image_variation_gpt4free(
         raise ValueError("input_image must be either str (path) or bytes")
 
     try:
-        response = await client.images.create_variation(
+        response = await asyncio.wait_for(client.images.create_variation(
             prompt=prompt,
             image=image_file,
             model=model or ConfigManager.image.get_selected_model("gpt4free"),
-        )
+        ), waiting_time)
         
         if not response.data or not hasattr(response.data[0], 'b64_json'):
             raise RuntimeError("Unexpected API response format")
@@ -44,8 +46,8 @@ async def create_image_variation_gpt4free(
 
         return image_data
         
-    except Exception as e:
-        raise RuntimeError(f"Failed to create image variation") from e
+    except Exception:
+        raise
     finally:
         if isinstance(input_image, str):
             image_file.close()

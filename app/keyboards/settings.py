@@ -1,6 +1,6 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from core.config import ConfigManager
+from core.managers import ConfigManager
 from core.models import User
 
 
@@ -16,7 +16,7 @@ def get_text_models_keyboard(user: User):
                 text=f"{model} {'✅' if model == user.text_model else ''}", 
                 callback_data=f"select_text_model_{model}"
             )
-        ] for model in ConfigManager.text.get_models(user.text_selected_tool)
+        ] for model in ConfigManager.text.get_models()
     ])
 
     return text_models
@@ -28,7 +28,7 @@ def get_image_models_keyboard(user: User):
                 text=f"{model} {'✅' if model == user.image_model else ''}", 
                 callback_data=f"select_image_model_{model}"
             )
-        ] for model in ConfigManager.image.get_models(user.text_selected_tool)
+        ] for model in ConfigManager.image.get_models()
     ])
 
     return image_models

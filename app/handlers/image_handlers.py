@@ -1,10 +1,9 @@
-from io import BytesIO
-
 from aiogram import F, Router, Bot
 from aiogram.types import Message
 from PIL import Image as PillowImage
 
 from core.managers import UserManager
+from core.managers import MessagesManager
 from core.models import Image
 from core.config import image_folder_path
 from ..utils.messages import edit_message, delete_message
@@ -15,8 +14,14 @@ from utils.file_tools import generate_file_name
 router = Router()
 
 @router.message(F.photo)
-async def photo_processing(message: Message, bot: Bot):
-    user = UserManager.get_user(message.from_user.id)
+async def photo_processing(
+    message: Message, 
+    bot: Bot, 
+    user_manager: UserManager, 
+    messages_manager: MessagesManager
+):
+    
+    user = user_manager.get_user(message.from_user.id, True)
 
     try:
         upload_image_message = await message.reply("🖼️ Загрузка изображения...")
@@ -26,7 +31,8 @@ async def photo_processing(message: Message, bot: Bot):
         file_bytes = await bot.download_file(file.file_path)
 
         image = PillowImage.open(file_bytes)
-        image.save(image_folder_path / f"{file_name}.png", format="PNG")
+        file_path = image_folder_path / f"{file_name}.png"
+        image.save(file_path, format="PNG")
     except Exception as e:
         await edit_message(upload_image_message, f"{e}\n❌ Произошла ошибка при загрузке изображения.", None)
         return
@@ -36,13 +42,27 @@ async def photo_processing(message: Message, bot: Bot):
 
         image = Image(file_name)
         await image.generate_description()
-        user.messages.add_image("user", image)
+        messages_manager.add_message(
+            user.id,
+            message.chat.id,
+            "user", 
+            image,
+            message.message_id
+        )
     except Exception as e:
+        if file_path.exists():
+            file_path.unlink()
         await edit_message(upload_image_message, f"{e}\n❌ Произошла ошибка при обработке изображения.", parse_mode=None)
         return
 
     if message.caption:
-        user.messages.add_message("user", message.caption)
+        messages_manager.add_message(
+            user.id, 
+            message.chat.id,
+            "user", 
+            message.caption,
+            message.message_id
+        )
 
         await delete_message(upload_image_message)
         await response_generation(message)

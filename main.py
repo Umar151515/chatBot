@@ -5,11 +5,11 @@ from aiogram.enums import ParseMode
 from aiogram.client.default import DefaultBotProperties
 
 from app.handlers import routers
+from app.core.services import UserService
 from core.managers import UserManager
-from core.config import ConfigManager
+from core.managers import MessagesManager
+from core.managers import ConfigManager
 
-
-UserManager.load()
 
 async def main():
     bot = Bot(
@@ -18,6 +18,11 @@ async def main():
     )
 
     dp = Dispatcher()
+
+    dp["user_service"] = UserService(bot)
+    dp["user_manager"] = UserManager()
+    dp["messages_manager"] = MessagesManager()
+
     for router in routers:
         dp.include_router(router)
 

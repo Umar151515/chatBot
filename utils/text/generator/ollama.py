@@ -2,23 +2,42 @@ import asyncio
 
 import ollama
 
-from core.config import ConfigManager
+from core.managers import ConfigManager
 from core.models import Messages
 from ..search import duckduckgo_search
 
 
-async def generate_text_ollama(messages: Messages, model:str = "", web_search:bool = False) -> str:
+async def generate_text_ollama(
+        messages: Messages | list[dict[str, str]] | str,
+        model:str = "", 
+        web_search:bool = False
+    ) -> str:
+
+    if isinstance(messages, list):
+        messages = Messages(messages)
+    elif isinstance(messages, str):
+        messages = Messages([{"role": "user", "content": messages}])
+    elif not isinstance(messages, Messages):
+        raise ValueError(f"Messages, list[dict[str, str]] or str should be passed and not {type(messages)}")
+
     if web_search:
-        query_messages = messages.get_messages()
-        query_messages.add_message("system", ConfigManager.prompts["search_query_generation"])
+        query_messages = messages.get_list(True) 
+        query_messages.append({"role": "system", 
+                               "content": ConfigManager.prompts["context_internet"]})
         query = await generate_text_ollama(query_messages, model)
         search_results = await duckduckgo_search(query, add_text=True)
         if search_results:
-            messages.add_message("system", f"{ConfigManager.prompts['context_internet']}{search_results}")
+            messages.add_message(
+                "system", 
+                f"{ConfigManager.prompts['context_internet']}{search_results}"
+            )
+
+    messages = messages.get_list()
+
     response = await asyncio.to_thread(
         ollama.chat,
         model=model or ConfigManager.text.get_selected_model("ollama"),
-        messages=messages.messages,
+        messages=messages,
         stream=False,
         options={
             "temperature": ConfigManager.generation_settings["temperature"],

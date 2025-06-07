@@ -11,13 +11,13 @@
                 "flux-pro",
                 "midjourney"
             ],
-            "selected_model": "flux",
+            "selected_model": "dall-e-3",
             "providers": [
                 "PollinationsAI",
                 "PollinationsImage",
                 "ARTA"
             ],
-            "selected_provider": "PollinationsAI"
+            "selected_provider": "PollinationsImage"
         }
     }
 }

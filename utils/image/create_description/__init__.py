@@ -1,3 +1,4 @@
 from .base import create_image_description
 from .gpt4free import create_image_description_gpt4free
+from .openrouter import create_image_description_openrouter
 from .ollama import create_image_description_ollama

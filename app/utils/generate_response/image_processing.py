@@ -8,6 +8,7 @@ import os
 from aiogram.types import Message, FSInputFile
 
 from core.models import Image
+from core.managers import MessagesManager
 from ..messages import edit_message, delete_message
 from core.config import image_folder_path
 
@@ -21,6 +22,8 @@ async def process_and_send_image(
         description:str = None
     ):
 
+    messages_manager = MessagesManager()
+
     try:
         image = Image(image_file_name)
         if description:
@@ -28,8 +31,19 @@ async def process_and_send_image(
         else:
             image.description = image.generate_description()
 
-        user.messages.add_image("assistant", image)
-        user.messages.add_message("assistant", user_content)
+        messages_manager.add_message(
+            user.id, 
+            wait_message.chat.id, 
+            "assistant", 
+            image
+        )
+        messages_manager.add_message(
+            user.id, 
+            wait_message.chat.id,
+            "assistant", 
+            user_content,
+            wait_message.message_id
+        )
     except Exception as e:
         os.remove(image_folder_path / (image_file_name + ".png"))
         await edit_message(wait_message, f"{e}\n❌ Произошла ошибка при обработке изображения.", None)

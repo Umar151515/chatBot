@@ -1,5 +1,6 @@
 /win_venv
 /har_and_cookies
+/.vscode
 __pycache__/
 /data
 *.env

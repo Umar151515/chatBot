@@ -4,17 +4,27 @@ import asyncio
 
 import ollama
 
-from core.config import ConfigManager
+from core.managers import ConfigManager
 
 
-async def create_image_description_ollama(image: str | bytes) -> str:
-    if isinstance(image, str) or isinstance(image, bytes):
+async def create_image_description_ollama(image: str | bytes, model:str = None) -> str:
+    if not isinstance(image, (str, bytes)):
         raise ValueError("image must be either str (path) or bytes")
     
     try:
+        if not model:
+            for model_name in ConfigManager.text.get_models("ollama"):
+                model_info = ollama.show(model_name)
+
+                if any("vision" in parametr for parametr in model_info["modelinfo"].keys()):
+                    model = model_name
+                    break
+            else:
+                raise RuntimeError("No vision model found in configured Ollama models")
+
         response = await asyncio.to_thread(
             ollama.chat,
-            model=ConfigManager.text.get_tool_config("ollama")["models_supporting_image"][0],
+            model=model,
             messages=[{"role": "system", "content": ConfigManager.prompts["image_description_guide"], "images": [image]}],
             stream=False,
             options={
@@ -27,5 +37,4 @@ async def create_image_description_ollama(image: str | bytes) -> str:
 
         return response['message']['content']
     except Exception as e:
-        print(f"Unexpected error during image description: {e}")
-        return None
+        raise
